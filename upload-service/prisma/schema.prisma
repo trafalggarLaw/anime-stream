@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgres://avnadmin:AVNS_kWsH0AAI2q3Zt6zm-JZ@pg-107ecd10-hrshsng98-97a3.l.aivencloud.com:18931/defaultdb?sslmode=require"
+  url = env("DATABASE_URL")
 }
 
 model VideoData {
