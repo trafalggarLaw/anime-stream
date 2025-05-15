@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import KafkaConfig from '../upload-service/kafka/kafka.js';
 import s3ToS3 from './hls/S3ToS3.js';
+import KafkaConfig from './kafka/kafka.js';
 
 dotenv.config();
 const port = process.env.PORT || 8081;
