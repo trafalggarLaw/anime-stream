@@ -13,12 +13,12 @@ const s3 = new AWS.S3({
    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
-const mp4FileName = 'trial2.mp4';
 const bucketName = process.env.AWS_BUCKET;
-const hlsFolder = 'hls';
 
 
 const s3ToS3 = async (filename) => {
+   const mp4FileName = filename;
+   const hlsFolder = `hls-${mp4FileName}`;
    console.log('Starting script');
    console.time('req_time');
    try {
