@@ -35,6 +35,11 @@ const s3ToS3 = async (filename) => {
        });
        console.log('Downloaded s3 mp4 file locally');
 
+       // ✅ Create HLS output folder
+        if (!fs.existsSync("hls")) {
+            fs.mkdirSync("hls");
+        }
+
        const resolutions = [
            {
                resolution: '320x180',
