@@ -6,7 +6,7 @@ class KafkaConfig {
    constructor(){
        this.kafka = new Kafka({
            clientId: "youtube uploader",
-           brokers: process.env.KAFKA_BROKER,
+           brokers: [process.env.KAFKA_BROKER],
            ssl: {
                ca: [fs.readFileSync(path.resolve("./ca.pem"), "utf-8")]
            },
