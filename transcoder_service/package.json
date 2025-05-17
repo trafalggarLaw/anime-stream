@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "devstart": "nodemon index.js",
+    "devstart": "chmod +x ./node_modules/ffmpeg-static/ffmpeg && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
