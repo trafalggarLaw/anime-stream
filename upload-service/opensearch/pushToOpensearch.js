@@ -1,5 +1,5 @@
 import { Client } from "@opensearch-project/opensearch";
-const PushToOpenSearch =  async (title, description, author, videoUrl) => {
+const PushToOpenSearch =  async (title, description, author, videoUrl, fileName) => {
    try {
        console.log('Pushing to Open Search');
        // Process video upload and extract metadata
@@ -14,7 +14,8 @@ const PushToOpenSearch =  async (title, description, author, videoUrl) => {
            title: title,
            author: author,
            description: description,
-           videoUrl: videoUrl
+           videoUrl: videoUrl,
+           fileName: fileName,
 };
        var response = await client.index({
            id: title, // id should ideally be db id
