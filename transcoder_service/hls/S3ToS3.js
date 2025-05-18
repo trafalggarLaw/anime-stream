@@ -78,59 +78,56 @@ const s3ToS3 = async (filename) => {
         ];
 
         const variantPlaylists = [];
+        console.log("🧪 Checking downloaded file...");
+        console.log("Exists:", fs.existsSync("local.mp4"));
+        const stats = fs.statSync("local.mp4");
+        console.log("File size (bytes):", stats.size);
+
 
         for (const { resolution, videoBitrate, audioBitrate } of resolutions) {
             console.log(`HLS conversion starting for ${resolution}`);
-            const outputFileName = `${mp4FileName.replace(
-                ".",
-                "_"
-            )}_${resolution}.m3u8`;
-            const segmentFileName = `${mp4FileName.replace(
-                ".",
-                "_"
-            )}_${resolution}_%03d.ts`;
-
+        
+            const outputFileName = `${mp4FileName.replace(".", "_")}_${resolution}.m3u8`;
+            const segmentFileName = `${mp4FileName.replace(".", "_")}_${resolution}_%03d.ts`;
+        
             await new Promise((resolve, reject) => {
                 ffmpeg("local.mp4")
                     .inputOptions([
-                        "-vsync 1",
-                        "-r 30",
+                        "-y",
+                        "-hide_banner",
+                        "-loglevel", "error",
                     ])
                     .outputOptions([
-                        "-map 0:v:0",
-                        "-map 0:a:0",
-                        "-c:v h264",
-                        `-b:v ${videoBitrate}`,
-                        "-c:a aac",
-                        `-b:a ${audioBitrate}`,
-                        `-vf scale=${resolution}:force_original_aspect_ratio=decrease,pad=${resolution}:(ow-iw)/2:(oh-ih)/2:color=black`,
-                        "-f hls",
-                        "-hls_time 10",
-                        "-hls_list_size 0",
-                        "-hls_flags independent_segments",
-                        `-hls_segment_filename ${hlsFolder}/${segmentFileName}`,
+                        "-map", "0:v:0",
+                        "-map", "0:a:0?", // optional audio
+                        "-c:v", "libx264",
+                        "-preset", "veryfast",
+                        `-b:v`, videoBitrate,
+                        "-c:a", "aac",
+                        `-b:a`, audioBitrate,
+                        `-vf`, `scale=${resolution}:force_original_aspect_ratio=decrease,pad=${resolution}:(ow-iw)/2:(oh-ih)/2:color=black`,
+                        "-f", "hls",
+                        "-hls_time", "10",
+                        "-hls_list_size", "0",
+                        "-hls_flags", "independent_segments",
+                        `-hls_segment_filename`, `${hlsFolder}/${segmentFileName}`,
                     ])
                     .output(`${hlsFolder}/${outputFileName}`)
-                    .on("start", (commandLine) => {
-                        console.log("FFmpeg command:", commandLine);
-                    })
-                    .on("stderr", (stderrLine) => {
-                        console.log("FFmpeg stderr:", stderrLine);
-                    })
+                    .on("start", (cmd) => console.log("FFmpeg command:", cmd))
                     .on("end", () => {
                         console.log(`✅ HLS conversion done for ${resolution}`);
                         resolve();
                     })
-                    .on("error", (err) => {
+                    .on("error", (err, stdout, stderr) => {
                         console.error(`❌ FFmpeg error for ${resolution}:`, err.message || err);
                         reject(err);
                     })
                     .run();
             });
-            
-
+        
             variantPlaylists.push({ resolution, outputFileName });
         }
+        
 
         console.log(`HLS master m3u8 playlist generating`);
 
