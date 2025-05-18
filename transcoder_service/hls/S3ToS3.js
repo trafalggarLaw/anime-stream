@@ -20,7 +20,9 @@ const bucketName = process.env.AWS_BUCKET;
 
 const s3ToS3 = async (filename) => {
     const mp4FileName = filename;
-    const hlsFolder = `hls`; // fixed
+    const hlsFolder = "/tmp/hls"; // safer on Render
+    fs.mkdirSync(hlsFolder, { recursive: true });
+
     console.log("Starting script");
     console.time("req_time");
 
@@ -95,7 +97,7 @@ const s3ToS3 = async (filename) => {
                         `-b:v ${videoBitrate}`,
                         "-c:a aac",
                         `-b:a ${audioBitrate}`,
-                        `-vf scale=${resolution}`,
+                        `-vf scale=${resolution}:force_original_aspect_ratio=decrease,pad=${resolution}:(ow-iw)/2:(oh-ih)/2`,
                         "-f hls",
                         "-hls_time 10",
                         "-hls_list_size 0",
