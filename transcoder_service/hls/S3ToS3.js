@@ -92,15 +92,22 @@ const s3ToS3 = async (filename) => {
 
             await new Promise((resolve, reject) => {
                 ffmpeg("local.mp4")
+                    .inputOptions([
+                        "-vsync 1",
+                        "-r 30",
+                    ])
                     .outputOptions([
+                        "-map 0:v:0",
+                        "-map 0:a:0",
                         "-c:v h264",
                         `-b:v ${videoBitrate}`,
                         "-c:a aac",
                         `-b:a ${audioBitrate}`,
-                        `-vf scale=${resolution}:force_original_aspect_ratio=decrease,pad=${resolution}:(ow-iw)/2:(oh-ih)/2`,
+                        `-vf scale=${resolution}:force_original_aspect_ratio=decrease,pad=${resolution}:(ow-iw)/2:(oh-ih)/2:color=black`,
                         "-f hls",
                         "-hls_time 10",
                         "-hls_list_size 0",
+                        "-hls_flags independent_segments",
                         `-hls_segment_filename ${hlsFolder}/${segmentFileName}`,
                     ])
                     .output(`${hlsFolder}/${outputFileName}`)
@@ -111,15 +118,16 @@ const s3ToS3 = async (filename) => {
                         console.log("FFmpeg stderr:", stderrLine);
                     })
                     .on("end", () => {
-                        console.log(`HLS conversion done for ${resolution}`);
+                        console.log(`✅ HLS conversion done for ${resolution}`);
                         resolve();
                     })
                     .on("error", (err) => {
-                        console.error(`FFmpeg error for ${resolution}:`, err);
+                        console.error(`❌ FFmpeg error for ${resolution}:`, err.message || err);
                         reject(err);
                     })
                     .run();
             });
+            
 
             variantPlaylists.push({ resolution, outputFileName });
         }
